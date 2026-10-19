@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3a0a2a">
+<title>A birthday surprise for you 🎂</title>
+<meta property="og:title" content="A birthday surprise for you 🎂">
+<meta property="og:description" content="Pop balloons, make a wish, watch a video and open your letter.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#3a0a2a;--bg2:#b0235a;--gold:#ffd54a;--teal:#2dd4bf}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:"Fredoka",system-ui,sans-serif;color:#fff;background:radial-gradient(130% 90% at 50% 0%,var(--bg2),var(--bg1)) fixed;overflow-x:hidden}
+#bar{position:fixed;top:0;left:0;height:4px;width:0;background:var(--gold);z-index:20;transition:width .5s}
+.screen{display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:max(34px,env(safe-area-inset-top)) 20px max(30px,env(safe-area-inset-bottom))}
+.screen.on{display:flex;animation:fade .5s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+h1{font-size:clamp(2rem,9vw,3.2rem);margin:0 0 8px;line-height:1.1}
+.sub{margin:0 0 24px;font-size:1.1rem;opacity:.88;max-width:32ch}
+button{font:inherit;font-weight:600;font-size:1.15rem;border:0;border-radius:999px;padding:14px 32px;background:var(--gold);color:#4a1238;cursor:pointer;box-shadow:0 6px 0 #c9a21c;margin-top:10px}
+button:active{transform:translateY(3px);box-shadow:0 3px 0 #c9a21c}
+button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+button.alt{background:var(--teal);box-shadow:0 6px 0 #1a9a8a;color:#05302b}
+.hidden{display:none!important}
+.big{font-size:clamp(3rem,16vw,5rem);font-weight:600;color:var(--gold);margin:6px 0}
+
+/* balloons */
+#balloons{display:flex;flex-wrap:wrap;justify-content:center;gap:16px 10px;max-width:420px;margin:6px 0 18px}
+.balloon{position:relative;width:62px;height:76px;border-radius:50% 50% 48% 48%/55% 55% 45% 45%;display:flex;align-items:center;justify-content:center;font-size:1.7rem;font-weight:600;cursor:pointer;animation:bob 3s ease-in-out infinite;transition:transform .15s,opacity .15s}
+.balloon::after{content:"";position:absolute;bottom:-18px;left:50%;width:2px;height:18px;background:rgba(255,255,255,.55)}
+.balloon::before{content:"";position:absolute;top:12px;left:14px;width:12px;height:18px;border-radius:50%;background:rgba(255,255,255,.35);transform:rotate(25deg)}
+.balloon.pop{transform:scale(1.8);opacity:0;pointer-events:none}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
+
+/* wish star */
+#star{font-size:6rem;cursor:pointer;animation:glow 1.6s ease-in-out infinite;transition:transform 1.4s ease-in,opacity 1.4s;user-select:none}
+#star.fly{transform:translateY(-70vh) scale(.3);opacity:0;animation:none}
+@keyframes glow{50%{transform:scale(1.15);filter:drop-shadow(0 0 22px #ffd54a)}}
+
+/* cake */
+.cakeSvg{width:min(88vw,360px);height:auto;overflow:visible}
+.flame{transform-box:fill-box;transform-origin:50% 100%;animation:flick .35s ease-in-out infinite alternate;transition:opacity .4s,transform .4s;cursor:pointer}
+.flame.out{opacity:0;transform:scale(.2);animation:none;pointer-events:none}
+@keyframes flick{from{transform:scale(1,1) rotate(-3deg)}to{transform:scale(.9,1.12) rotate(3deg)}}
+#slice{transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+#slice.cut{transform:translate(34px,14px) rotate(9deg);transform-origin:250px 240px}
+#knife{opacity:0}
+#knife.go{animation:knife .8s ease-in forwards}
+@keyframes knife{0%{opacity:1;transform:translateY(-60px)}70%{opacity:1;transform:translateY(0)}100%{opacity:0}}
+
+/* reasons */
+#card{width:min(86vw,340px);min-height:200px;background:#fff8e7;color:#4a1238;border-radius:18px;padding:28px 22px;font-family:"Caveat",cursive;font-size:2rem;line-height:1.25;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 14px 34px rgba(0,0,0,.4);transform:rotate(-2deg);transition:transform .25s}
+#card.swap{transform:rotate(3deg) scale(.94)}
+
+/* photos */
+.pics{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;width:100%;padding:14px 12vw 18px}
+.pics figure{flex:0 0 72%;max-width:290px;margin:0;scroll-snap-align:center;background:#fff;color:#4a1238;padding:10px 10px 14px;border-radius:6px;box-shadow:0 10px 26px rgba(0,0,0,.4);transform:rotate(var(--r))}
+.pics img,.pics .ph{width:100%;aspect-ratio:4/5;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:4rem;background:linear-gradient(135deg,#ffd1e3,#c7b6ff);border-radius:3px}
+.pics figcaption{font-family:"Caveat",cursive;font-size:1.5rem;margin-top:8px}
+
+/* love question */
+#loveBtns{display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap;min-height:150px;width:100%}
+#yesBtn{transition:font-size .3s,padding .3s;background:#ff2d6f;color:#fff;box-shadow:0 6px 0 #a3154a}
+#noBtn{transition:left .3s,top .3s;z-index:30;touch-action:manipulation}
+/* cute extras */
+.fl{position:fixed;font-size:1.6rem;pointer-events:none;z-index:15;animation:floatup 1.2s ease-out forwards}
+@keyframes floatup{to{transform:translateY(-130px);opacity:0}}
+#teddy{font-size:8rem;line-height:1;cursor:pointer;user-select:none;transition:transform .15s}
+#teddy.sq{transform:scale(.8,1.12)}
+#mNext{position:relative;z-index:5}
+#meter{width:min(80vw,300px);height:18px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden;margin:6px 0 4px}
+#mFill{height:100%;width:0;background:linear-gradient(90deg,#ff8fb1,#ff2d6f);border-radius:99px}
+#mHeart{font-size:6rem;line-height:1;margin:46px 0;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;cursor:pointer;transition:transform .08s}
+#arena{position:relative;width:min(92vw,420px);height:52dvh;overflow:hidden;border-radius:20px;background:rgba(255,255,255,.1);margin-bottom:10px}
+.hf{position:absolute;top:-60px;font-size:2.6rem;cursor:pointer;user-select:none;animation:fall linear forwards}
+@keyframes fall{to{top:105%}}
+.hf.got{animation-play-state:paused;transform:scale(1.8);opacity:0;transition:transform .25s,opacity .25s}
+.scratch{position:relative;width:min(86vw,320px);height:104px;margin-bottom:12px;background:#fff8e7;color:#4a1238;border-radius:16px;display:flex;align-items:center;justify-content:center;padding:8px 14px;font-family:"Caveat",cursive;font-size:1.5rem;line-height:1.15;box-shadow:0 10px 26px rgba(0,0,0,.4)}
+.sCv{position:absolute;inset:0;width:100%;height:100%;border-radius:16px;touch-action:none;transition:opacity .6s}
+#cookie{font-size:7rem;line-height:1;cursor:pointer;user-select:none}
+#cookie.shake{animation:shake .45s}
+#slip{background:#fff8e7;color:#4a1238;border-radius:8px;padding:16px 18px;max-width:320px;margin:14px 0 6px;font-family:"Caveat",cursive;font-size:1.7rem;line-height:1.25;box-shadow:0 10px 26px rgba(0,0,0,.4);animation:rise .6s ease both}
+/* candy crush */
+.crow{display:flex;align-items:center;gap:12px;width:min(92vw,360px);margin-bottom:10px;text-align:left}
+#cprize{width:64px;height:64px;flex:none;border-radius:12px;overflow:hidden;border:3px solid #fff;background:linear-gradient(135deg,#ffd1e3,#c7b6ff);display:flex;align-items:center;justify-content:center;font-size:2rem}
+#cprize img{width:100%;height:100%;object-fit:cover;filter:blur(14px);transform:scale(1.2);transition:filter .4s}
+.cinfo{flex:1}#cscore{font-size:1.2rem;font-weight:600}
+#cbar{height:12px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden;margin-top:6px}
+#cfill{height:100%;width:0;background:linear-gradient(90deg,#ffd54a,#ff5d8f);border-radius:99px;transition:width .4s}
+#cboard{position:relative;width:min(92vw,360px);aspect-ratio:1;background:rgba(0,0,0,.28);border-radius:16px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:inset 0 0 0 3px rgba(255,255,255,.15)}
+.cd{position:absolute;left:0;top:0;width:calc(100% / 7);height:calc(100% / 7);display:flex;align-items:center;justify-content:center;font-size:min(9vw,32px);transition:transform .25s ease;pointer-events:none}
+.cd span{display:block;transition:transform .2s,opacity .2s}
+.cd.pop span{transform:scale(0) rotate(120deg);opacity:0}
+.cd.sel{background:rgba(255,255,255,.25);border-radius:10px}.cd.sel span{transform:scale(1.2)}
+#cwin{position:fixed;inset:0;z-index:25;background:rgba(40,5,30,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
+#cwin img{max-width:86vw;max-height:52dvh;border-radius:14px;border:6px solid #fff;box-shadow:0 14px 40px rgba(0,0,0,.5);animation:rise .8s ease both}
+#cwin .em{font-size:7rem}
+/* love gifs */
+#gifBox{position:fixed;inset:0;z-index:25;background:rgba(40,5,30,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;cursor:pointer}
+#gifBox img{max-width:88vw;max-height:56dvh;border-radius:16px;border:5px solid #fff;box-shadow:0 14px 40px rgba(0,0,0,.5);animation:rise .5s ease both}
+#gifFb{font-size:5rem;animation:bob 1.2s ease-in-out infinite}
+#gifCap{font-family:"Caveat",cursive;font-size:2rem;margin:14px 0 8px}
+#gifDots{display:flex;gap:8px;margin:6px 0 10px}
+#gifDots i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.3)}
+#gifDots i.on{background:var(--gold)}
+/* video */
+.vbox{width:min(92vw,420px);aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 12px 34px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center}
+.vbox video{width:100%;height:100%;object-fit:contain}
+
+/* gift */
+#gift{font-size:7rem;cursor:pointer;user-select:none;line-height:1}
+#gift.shake{animation:shake .4s}
+@keyframes shake{25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+#giftMsg{background:#fff8e7;color:#4a1238;border-radius:16px;padding:22px;max-width:340px;font-family:"Caveat",cursive;font-size:1.8rem;line-height:1.25;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+
+
+/* envelope + letter */
+.env{position:relative;width:270px;height:180px;background:#f3cf9e;border-radius:8px;box-shadow:0 14px 34px rgba(0,0,0,.45);cursor:pointer;transition:opacity .6s}
+.env .flap{position:absolute;inset:0;background:#e8b97a;clip-path:polygon(0 0,100% 0,50% 62%);transform-origin:top;transition:transform .6s}
+.env.open .flap{transform:rotateX(180deg)}
+.env .seal{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);font-size:2.4rem;color:#e11d48;z-index:2;transition:opacity .3s}
+.env.open .seal{opacity:0}
+.env.gone{opacity:0;pointer-events:none}
+#fin{justify-content:flex-start}
+.paper{position:relative;z-index:10;background:#fff8e7;color:#3a2a1a;max-width:430px;width:100%;padding:28px 24px;border-radius:6px;box-shadow:0 14px 40px rgba(0,0,0,.45);text-align:left;font-family:"Caveat",cursive;font-size:1.65rem;line-height:1.35;animation:rise .9s ease both}
+.paper h2{margin:0 0 12px;font-size:2.3rem}
+.paper p{margin:0 0 12px;opacity:0;animation:in .8s ease forwards}
+.paper .sign{text-align:right;font-size:1.9rem;margin:18px 0 0}
+@keyframes rise{from{opacity:0;transform:translateY(40px) scale(.9)}}
+@keyframes in{to{opacity:1}}
+#fin button{position:relative;z-index:10}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:8}
+@media (prefers-reduced-motion:reduce){.balloon,.flame,#star{animation:none}}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<!-- 1 START -->
+<section class="screen on">
+  <h1 id="hello"></h1><p class="sub" id="intro"></p>
+  <button id="startBtn"></button>
+</section>
+
+<!-- 2 GREETING -->
+<section class="screen" id="s-greet">
+  <p class="sub" style="margin:0">Today belongs to</p>
+  <h1 id="gName"></h1>
+  <div class="big" id="gAge">0</div>
+  <p class="sub" id="gDate"></p>
+  <button data-next>Next</button>
+</section>
+
+<!-- 3 LOVE QUESTION -->
+<section class="screen">
+  <h1 id="loveQ"></h1><p class="sub" id="loveSub">Choose carefully 😏</p>
+  <div id="loveBtns"><button id="yesBtn">Yes ❤️</button><button id="noBtn" class="alt">No</button></div>
+  <button data-next class="hidden" id="loveNext">Continue</button>
+  <div id="gifBox" class="hidden">
+    <img id="gifImg" alt=""><div id="gifFb" class="hidden"></div>
+    <p id="gifCap"></p><div id="gifDots"></div><small style="opacity:.6">Tap to skip</small>
+  </div>
+</section>
+
+<!-- 4 BALLOONS -->
+<section class="screen">
+  <h1>Pop the balloons</h1><p class="sub" id="left"></p>
+  <div id="balloons"></div>
+</section>
+
+<!-- 4 WISH -->
+<section class="screen">
+  <h1>Make a wish</h1>
+  <p class="sub" id="wishSub">Close your eyes, think of one wish, then tap the star.</p>
+  <div id="star">⭐</div>
+  <button data-next class="hidden" id="wishNext">Next</button>
+</section>
+
+<!-- 5 CAKE -->
+<section class="screen">
+  <h1 id="cakeTitle">Blow out the candles</h1>
+  <p class="sub" id="cakeSub">Tap the flames, or tap the button.</p>
+  <svg class="cakeSvg" id="cakeSvg" viewBox="0 0 300 280" aria-label="Birthday cake">
+    <defs>
+      <g id="cake">
+        <rect x="30" y="170" width="240" height="72" rx="14" fill="#f2b880"/>
+        <rect x="30" y="170" width="240" height="24" rx="12" fill="#ff8fb1"/>
+        <g fill="#ff8fb1"><circle cx="60" cy="194" r="9"/><circle cx="104" cy="196" r="11"/><circle cx="152" cy="194" r="9"/><circle cx="196" cy="197" r="11"/><circle cx="242" cy="194" r="9"/></g>
+        <rect x="70" y="118" width="160" height="58" rx="12" fill="#ff6f9c"/>
+        <rect x="70" y="118" width="160" height="18" rx="9" fill="#fff"/>
+        <g fill="#fff"><circle cx="96" cy="136" r="8"/><circle cx="136" cy="139" r="9"/><circle cx="176" cy="136" r="8"/><circle cx="212" cy="138" r="8"/></g>
+        <g fill="#ffd54a"><rect x="90" y="156" width="10" height="4" rx="2" transform="rotate(20 95 158)"/><rect x="140" y="160" width="10" height="4" rx="2" transform="rotate(-25 145 162)"/><rect x="190" y="154" width="10" height="4" rx="2" transform="rotate(35 195 156)"/></g>
+        <g fill="#2dd4bf"><rect x="64" y="212" width="10" height="4" rx="2"/><rect x="124" y="218" width="10" height="4" rx="2" transform="rotate(30 129 220)"/><rect x="210" y="214" width="10" height="4" rx="2" transform="rotate(-20 215 216)"/></g>
+      </g>
+      <clipPath id="clipL"><rect x="0" y="0" width="205" height="300"/></clipPath>
+      <clipPath id="clipR"><rect x="205" y="0" width="100" height="300"/></clipPath>
+    </defs>
+    <ellipse cx="150" cy="246" rx="140" ry="16" fill="#e8e1f5"/>
+    <use href="#cake" clip-path="url(#clipL)"/>
+    <use id="slice" href="#cake" clip-path="url(#clipR)"/>
+    <g id="candles"></g>
+    <g id="knife"><rect x="203" y="110" width="4" height="130" fill="#e5e7eb"/><rect x="198" y="96" width="14" height="18" rx="4" fill="#6b7280"/></g>
+  </svg>
+  <button id="blowBtn" class="alt">Blow them out</button>
+  <button data-next class="hidden" id="cakeNext">Cut the cake</button>
+</section>
+
+<!-- 6 CUT -->
+<section class="screen" id="s-cut">
+  <h1>Cake cut cheyu Bubu</h1><p class="sub" id="cutSub">One slice for the birthday girl.</p>
+  <div id="cutBox"></div>
+  <button id="cutBtn">Cut it</button>
+  <button data-next class="hidden" id="cutNext">Keep going</button>
+</section>
+
+<!-- EXTRA: HUG -->
+<section class="screen" id="s-hug">
+  <h1>Hug time 🤗</h1><p class="sub" id="hugSub">Tap the teddy 5 times to hug dudu</p>
+  <div id="teddy" role="button" tabindex="0" aria-label="Teddy bear">🧸</div>
+  <button data-next class="hidden" id="hugNext">Next</button>
+</section>
+
+<!-- 7 REASONS -->
+<section class="screen" id="s-reasons">
+  <h1>Nuvvu naaku enduku special ante</h1><p class="sub" id="rCount"></p>
+  <div id="card" role="button" tabindex="0"></div>
+  <p class="sub" style="margin-top:16px;font-size:.95rem">Tap the card for the next one</p>
+  <button data-next class="hidden" id="rNext">Next</button>
+</section>
+
+<!-- EXTRA: LOVE METER -->
+<section class="screen" id="s-meter">
+  <h1>How much do I love you?</h1><p class="sub" id="mSub">Press and hold the heart</p>
+  <div id="meter"><div id="mFill"></div></div><div class="big" id="mPct">0%</div>
+  <div id="mHeart" aria-label="Hold the heart">💗</div>
+  <button data-next class="hidden" id="mNext">Next</button>
+</section>
+
+<!-- 8 PHOTOS -->
+<section class="screen">
+  <h1>Our memories</h1><p class="sub" id="pCount">Swipe through</p>
+  <div class="pics" id="pics"></div>
+  <button data-next>Next</button>
+</section>
+
+<!-- 9 VIDEO -->
+<section class="screen" id="s-video">
+  <h1 id="vTitle"></h1><p class="sub">Full screen lo chudu amma</p>
+  <div class="vbox" id="vbox"><video id="vid" playsinline controls preload="metadata"></video></div>
+  <button data-next>Continue</button>
+</section>
+
+<!-- EXTRA: CATCH HEARTS -->
+<section class="screen" id="s-catch">
+  <h1>Catch the hearts 💕</h1><p class="sub" id="cSub"></p>
+  <div id="arena"></div>
+  <button data-next class="hidden" id="cNext">Next</button>
+</section>
+
+<!-- 10 GIFT -->
+<section class="screen">
+  <h1>A gift for you</h1><p class="sub" id="gSub">Tap the box 3 times</p>
+  <div id="gift" role="button" tabindex="0">🎁</div>
+  <div id="giftMsg" class="hidden"></div>
+  <button data-next class="hidden" id="gNext">Next</button>
+</section>
+
+<!-- EXTRA: CANDY CRUSH -->
+<section class="screen" id="s-candy">
+  <h1>Candy crush 🍬</h1>
+  <div class="crow"><div id="cprize">🎁</div>
+    <div class="cinfo"><div id="cscore"></div><div id="cbar"><div id="cfill"></div></div></div></div>
+  <div id="cboard"></div>
+  <p class="sub" style="margin:10px 0 0;font-size:.95rem" id="cHint">Swipe a candy to match 3 or more. Score to reveal the photo!</p>
+  <button data-next class="hidden alt" id="cSkip" style="padding:8px 20px;font-size:.95rem">Skip</button>
+  <div id="cwin" class="hidden">
+    <h1>You did it! 🎉</h1><p class="sub" id="cwMsg"></p><div id="cwPic"></div>
+    <button data-next>Continue</button>
+  </div>
+</section>
+
+<!-- EXTRA: SCRATCH CARD -->
+<section class="screen" id="s-scratch">
+  <h1>A secret message</h1><p class="sub">Scratch both cards with your finger</p>
+  <div id="scs"></div>
+  <button data-next class="hidden" id="sNext">Next</button>
+</section>
+
+<!-- EXTRA: FORTUNE COOKIE -->
+<section class="screen" id="s-cookie">
+  <h1>Your fortune cookie 🥠</h1><p class="sub" id="fcSub">Cookie ni break cheyu bubu</p>
+  <div id="cookie" role="button" tabindex="0" aria-label="Fortune cookie">🥠</div>
+  <div id="slip" class="hidden"></div>
+  <button data-next class="hidden" id="fcNext">Open your letter</button>
+</section>
+
+<!-- 12 FINAL LETTER -->
+<section class="screen" id="fin">
+  <div id="envWrap" style="margin:auto;text-align:center">
+    <h1>A letter for you</h1><p class="sub" style="margin:0 auto 26px">Open chesi chudu bubu amma</p>
+    <div class="env" id="env"><div class="flap"></div><div class="seal">♥</div></div>
+  </div>
+  <div class="paper hidden" id="paper">
+    <h2 id="lTitle"></h2><div id="lBody"></div><p class="sign" id="lSign"></p>
+  </div>
+  <button id="again" class="hidden alt" style="margin-top:22px">Watch again</button>
+</section>
+
+<canvas id="fx"></canvas>
+<audio id="music" loop preload="auto"></audio>
+
+<script>
+/* =====================================================
+   EDIT HERE – names, messages, photos, video and music
+   ===================================================== */
+const CONFIG = {
+  name: "Swathi",
+  from: "Naveen",
+  date: "25 October",
+  age: 24,
+  title: "HAPPY BIRTHDAY BUBU",                 // letters on the balloons
+  introText: "Dudu neekosam oka surprise plan chesadu",
+  startButton: "Open your surprise",
+  loveQuestion: "Do you love me? 🥺",
+  loveYesReply: "I knew it! I love you too ❤️",
+  gifSeconds: 3,                           // seconds each GIF stays on screen (tap to skip)
+  loveGifs: [                              // GIFs shown one by one after she taps Yes
+    { src: "gif1.gif", caption: "Dudu is so happy! 🐻" },
+    { src: "gif2.gif", caption: "Dudu is dancing for you 🐼" },
+    { src: "gif3.gif", caption: "Hugs and kisses 💕" },
+    { src: "gif4.gif", caption: "Dudu ❤️ Bubu" }
+  ],
+  hugMessage: "A big birthday hug from me 🤗",
+  meterText: "To infinity and beyond ♾️",
+  catchGoal: 10,                           // hearts to catch in the game
+  scratchCards: [                          // add or remove lines = more or fewer cards
+    "Naa bujji konda surpise ayyindi 💖",
+    "Nuvvu eeroju chala happy vundali bubu 😊"
+  ],
+  candyTarget: 1000,                       // score needed to reveal the photo
+  candyPhoto: "image2.png",                // photo revealed after winning (same folder)
+  candyMessage: "You are amazing! Here is your surprise 💖",
+  fortunes: [                              // fortune cookie messages
+    "This year will bring you endless smiles.",
+    "Our migthier God will bless you with his abundance Grace ❤️",
+    "A big surprise is waiting for you soon."
+  ],
+  candles: 5,                              // 1 to 7
+  reasons: [
+    "You make every room feel warmer just by walking in.",
+    "Your laugh is the best sound in the world.",
+    "You show up for people, every single time.",
+    "You make ordinary days feel special."
+  ],
+  photos: [                                // put images next to index.html
+    { src: "image1.png", caption: "Our first trip" },   // e.g. src: "photo1.jpg"
+    { src: "image2.png", caption: "That silly day" },
+    { src: "2022.png", caption: "2022" },
+    { src: "2023.png", caption: "2023" },
+    { src: "2024.png", caption: "2024" },
+    { src: "2025.png", caption: "2025" },
+    { src: "2026.png", caption: "2026" }
+  ],
+  videoTitle: "Idhe bday video bubulu",
+  video: "video.mp4",                      // your 30 second video, same folder
+  videoPoster: "gif5.gif",                         // optional thumbnail image
+  gift: "Your gift is waiting for you. Ask me about it today!",
+  letterTitle: "Dear Bubu,",
+  letter: [
+    "Happy birthday! I hope today is full of cake, laughter and everyone you love.",
+    "Thank you for being the kind of person who makes hard days lighter.",
+    "I'm so lucky to know you. Here's to another beautiful year."
+  ],
+  signature: "With all my love, Dudu",
+  music: ""                                // e.g. "song.mp3" (same folder)
+};
+/* ===================================================== */
+
+const $ = s => document.querySelector(s);
+const S = [...document.querySelectorAll(".screen")];
+const mus = $("#music"), vid = $("#vid");
+let cur = 0;
+const init = {};
+
+function go(i) {
+  if (S[cur].id === "s-video") { vid.pause(); if (CONFIG.music) mus.play().catch(() => {}); }
+  S.forEach(s => s.classList.remove("on"));
+  S[i].classList.add("on"); cur = i;
+  $("#bar").style.width = ((i + 1) / S.length * 100) + "%";
+  window.scrollTo(0, 0);
+  if (init[S[i].id]) init[S[i].id]();
+}
+document.querySelectorAll("[data-next]").forEach(b => b.onclick = () => go(cur + 1));
+
+/* ---------- confetti + hearts ---------- */
+const cv = $("#fx"), cx = cv.getContext("2d"); let P = [], running = false, amb = false;
+const D = Math.min(devicePixelRatio || 1, 2);
+const fit = () => { cv.width = innerWidth * D; cv.height = innerHeight * D; };
+fit(); addEventListener("resize", fit);
+const COL = ["#ffd54a","#ff5d8f","#2dd4bf","#8b5cf6","#fb923c","#fff"];
+const HC = ["#ff2d6f","#ff5d8f","#ff8fb1","#e11d48","#ffc2d6","#fff"];
+const start = () => { if (!running) { running = true; requestAnimationFrame(tick); } };
+function burst(x, y, n = 40) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * 6.28, v = (2 + Math.random() * 6) * D;
+    P.push({t: 0, x: x * D, y: y * D, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 3 * D, r: (3 + Math.random() * 4) * D, c: COL[i % 6], l: 70 + Math.random() * 40});
+  }
+  start();
+}
+const rain = () => { for (let i = 0; i < 6; i++) setTimeout(() => burst(Math.random() * innerWidth, innerHeight * .3, 40), i * 180); };
+function heart(scatter) {
+  P.push({t: 1, x: Math.random() * cv.width, y: scatter ? Math.random() * cv.height : cv.height + 40 * D,
+    s: (16 + Math.random() * 34) * D, vy: -(0.8 + Math.random() * 2) * D, ph: Math.random() * 6, c: HC[(Math.random() * 6) | 0], a: scatter ? 0 : 1});
+}
+function flood() { for (let i = 0; i < 160; i++) heart(true); for (let i = 0; i < 80; i++) setTimeout(() => heart(false), i * 30); amb = true; start(); }
+function tick() {
+  cx.clearRect(0, 0, cv.width, cv.height);
+  if (amb && Math.random() < .35) heart(false);
+  P = P.filter(p => p.t ? p.y > -60 * D : p.l-- > 0);
+  P.forEach(p => {
+    if (p.t) {
+      p.y += p.vy; p.ph += .04; p.x += Math.sin(p.ph) * .8 * D; p.a = Math.min(1, p.a + .03);
+      cx.globalAlpha = p.a * .9; cx.fillStyle = p.c; cx.font = p.s + "px serif"; cx.fillText("♥", p.x, p.y);
+    } else {
+      p.x += p.vx; p.y += p.vy; p.vy += .18 * D;
+      cx.globalAlpha = Math.min(1, p.l / 30); cx.fillStyle = p.c; cx.fillRect(p.x, p.y, p.r, p.r * .6);
+    }
+  });
+  cx.globalAlpha = 1;
+  if (P.length || amb) requestAnimationFrame(tick); else { running = false; cx.clearRect(0, 0, cv.width, cv.height); }
+}
+
+/* ---------- 1 start ---------- */
+document.title = "A birthday surprise for " + CONFIG.name + " 🎂";
+$("#hello").textContent = "Hey " + CONFIG.name + "! 🎈";
+$("#intro").textContent = CONFIG.introText;
+$("#startBtn").textContent = CONFIG.startButton;
+$("#startBtn").onclick = () => {
+  if (CONFIG.music) { mus.src = CONFIG.music; mus.play().catch(() => {}); }
+  go(1);
+};
+
+/* ---------- 2 greeting ---------- */
+$("#gName").textContent = CONFIG.name;
+$("#gDate").textContent = CONFIG.date;
+init["s-greet"] = () => {
+  const el = $("#gAge"); let n = 0;
+  const t = setInterval(() => { el.textContent = ++n; if (n >= CONFIG.age) { clearInterval(t); burst(innerWidth / 2, innerHeight * .4, 50); } }, 60);
+};
+
+/* ---------- 3 balloons ---------- */
+const BC = ["#ff5d8f","#ffb703","#2dd4bf","#8b5cf6","#fb7185","#38bdf8","#f97316"];
+const letters = CONFIG.title.replace(/\s/g, "").split("");
+let remaining = letters.length;
+const upd = () => $("#left").textContent = remaining + " left";
+upd();
+letters.forEach((ch, i) => {
+  const b = document.createElement("div");
+  b.className = "balloon"; b.textContent = ch;
+  b.style.background = BC[i % 7]; b.style.animationDelay = (i * -.37) + "s";
+  b.onclick = e => {
+    if (b.classList.contains("pop")) return;
+    b.classList.add("pop"); burst(e.clientX, e.clientY, 18);
+    if (navigator.vibrate) navigator.vibrate(20);
+    remaining--; upd();
+    if (!remaining) setTimeout(() => { rain(); setTimeout(() => go(cur + 1), 900); }, 300);
+  };
+  $("#balloons").appendChild(b);
+});
+
+/* ---------- 4 wish ---------- */
+$("#star").onclick = () => {
+  const s = $("#star"); if (s.classList.contains("fly")) return;
+  s.classList.add("fly"); burst(innerWidth / 2, innerHeight / 2, 40);
+  $("#wishSub").textContent = "Your wish is on its way ✨";
+  setTimeout(() => $("#wishNext").classList.remove("hidden"), 1300);
+};
+
+/* ---------- 5 candles ---------- */
+const nC = Math.max(1, Math.min(7, CONFIG.candles));
+let lit = nC; const flames = [], NS = "http://www.w3.org/2000/svg";
+const mk = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
+for (let i = 0; i < nC; i++) {
+  const x = nC === 1 ? 120 : 90 + i * (110 / (nC - 1));
+  const g = $("#candles");
+  g.appendChild(mk("rect", {x: x - 4, y: 88, width: 8, height: 32, rx: 2, fill: ["#ff5d8f","#2dd4bf","#8b5cf6","#fb923c"][i % 4]}));
+  const f = mk("g", {class: "flame"});
+  f.appendChild(mk("ellipse", {cx: x, cy: 78, rx: 6, ry: 11, fill: "#ffb703"}));
+  f.appendChild(mk("ellipse", {cx: x, cy: 82, rx: 3, ry: 6, fill: "#fff3b0"}));
+  f.appendChild(mk("circle", {cx: x, cy: 78, r: 18, fill: "transparent"}));
+  f.onclick = () => snuff(f);
+  g.appendChild(f); flames.push(f);
+}
+function snuff(f) {
+  if (f.classList.contains("out")) return;
+  f.classList.add("out");
+  if (--lit === 0) {
+    $("#cakeTitle").textContent = "Wish made! 🎉"; $("#cakeSub").textContent = "Now for the best part.";
+    $("#blowBtn").classList.add("hidden"); $("#cakeNext").classList.remove("hidden"); rain();
+  }
+}
+$("#blowBtn").onclick = () => flames.forEach((f, i) => setTimeout(() => snuff(f), i * 150));
+
+/* ---------- 6 cut ---------- */
+init["s-cut"] = () => $("#cutBox").appendChild($("#cakeSvg"));
+$("#cutBtn").onclick = () => {
+  $("#cutBtn").classList.add("hidden"); $("#knife").classList.add("go");
+  setTimeout(() => { $("#slice").classList.add("cut"); rain(); $("#cutSub").textContent = "Delicious! 🍰"; }, 700);
+  setTimeout(() => $("#cutNext").classList.remove("hidden"), 1500);
+};
+
+/* ---------- 7 reasons ---------- */
+let ri = 0; const card = $("#card");
+function showReason() {
+  card.classList.add("swap");
+  setTimeout(() => { card.textContent = CONFIG.reasons[ri]; card.classList.remove("swap"); }, 150);
+  $("#rCount").textContent = (ri + 1) + " of " + CONFIG.reasons.length;
+  if (ri === CONFIG.reasons.length - 1) $("#rNext").classList.remove("hidden");
+}
+card.onclick = () => { if (ri < CONFIG.reasons.length - 1) { ri++; showReason(); burst(innerWidth / 2, innerHeight / 2, 12); } };
+card.onkeydown = e => { if (e.key === "Enter" || e.key === " ") card.click(); };
+init["s-reasons"] = () => { ri = 0; $("#rNext").classList.toggle("hidden", CONFIG.reasons.length > 1); card.textContent = CONFIG.reasons[0]; $("#rCount").textContent = "1 of " + CONFIG.reasons.length; };
+
+/* ---------- 8 photos ---------- */
+CONFIG.photos.forEach((p, i) => {
+  const f = document.createElement("figure"); f.style.setProperty("--r", (i % 2 ? 2 : -2) + "deg");
+  let m;
+  if (p.src) { m = new Image(); m.src = p.src; m.alt = p.caption || ""; } else { m = document.createElement("div"); m.className = "ph"; m.textContent = "📷"; }
+  const c = document.createElement("figcaption"); c.textContent = p.caption || "";
+  f.append(m, c); $("#pics").appendChild(f);
+});
+
+/* photo counter */
+const pics = $("#pics"), nP = CONFIG.photos.length;
+$("#pCount").textContent = "Swipe · 1 of " + nP;
+pics.addEventListener("scroll", () => {
+  const max = pics.scrollWidth - pics.clientWidth;
+  const i = max > 0 ? Math.round(pics.scrollLeft / max * (nP - 1)) : 0;
+  $("#pCount").textContent = "Swipe · " + (i + 1) + " of " + nP;
+}, {passive: true});
+
+/* ---------- love question ---------- */
+$("#loveQ").textContent = CONFIG.loveQuestion;
+const yes = $("#yesBtn"), no = $("#noBtn"), MAXNO = 5;
+let noCount = 0, lastNo = 0;
+function growYes() {
+  yes.style.fontSize = (1.15 + noCount * .5) + "rem";
+  yes.style.padding = (14 + noCount * 6) + "px " + (32 + noCount * 10) + "px";
+}
+function hit(a, b, m) { return !(a.right + m < b.left || a.left - m > b.right || a.bottom + m < b.top || a.top - m > b.bottom); }
+function dodge(e) {
+  e.preventDefault(); lastNo = Date.now();
+  if (noCount >= MAXNO) {
+    no.classList.add("hidden");
+    $("#loveSub").textContent = "Only one option left 😄";
+    return;
+  }
+  if (noCount === 0) {
+    const r = no.getBoundingClientRect();
+    no.style.left = r.left + "px"; no.style.top = r.top + "px"; no.style.position = "fixed";
+    void no.offsetWidth;
+  }
+  noCount++; growYes();
+  const w = no.offsetWidth, h = no.offsetHeight, y = yes.getBoundingClientRect();
+  const prev = no.getBoundingClientRect();
+  let x0 = 12, y0 = 12;
+  for (let t = 0; t < 40; t++) {
+    const x = 12 + Math.random() * (innerWidth - w - 24), yy = 70 + Math.random() * (innerHeight - h - 100);
+    const box = {left: x, right: x + w, top: yy, bottom: yy + h};
+    if (!hit(box, y, 14) && Math.hypot(x - prev.left, yy - prev.top) > 90) { x0 = x; y0 = yy; break; }
+    x0 = x; y0 = yy;
+  }
+  no.style.left = x0 + "px"; no.style.top = y0 + "px";
+  $("#loveSub").textContent = ["Are you sure? 🤔","Try again 😜","Nope, wrong button!","Really? 🥹","Last chance 😏"][noCount - 1];
+  if (navigator.vibrate) navigator.vibrate(25);
+}
+no.addEventListener("pointerdown", dodge);
+no.addEventListener("click", e => e.preventDefault());
+yes.addEventListener("click", () => {
+  if (Date.now() - lastNo < 500 || yes.disabled) return;
+  yes.disabled = true; no.classList.add("hidden");
+  $("#loveSub").textContent = CONFIG.loveYesReply;
+  for (let i = 0; i < 40; i++) setTimeout(() => heart(false), i * 40);
+  start(); rain();
+  setTimeout(playGifs, 1700);
+});
+function playGifs() {
+  const G2 = CONFIG.loveGifs || [], box = $("#gifBox"), img = $("#gifImg"), fb = $("#gifFb"), dots = $("#gifDots");
+  if (!G2.length) { $("#loveNext").classList.remove("hidden"); return; }
+  dots.innerHTML = G2.map(() => "<i></i>").join(""); let i = 0, tm = null;
+  const fallback = g => { img.classList.add("hidden"); fb.textContent = g.emoji || "🐻💕🐼"; fb.classList.remove("hidden"); };
+  const show = () => {
+    clearTimeout(tm);
+    if (i >= G2.length) { box.classList.add("hidden"); $("#loveNext").classList.remove("hidden"); rain(); return; }
+    const g = G2[i]; $("#gifCap").textContent = g.caption || "";
+    [...dots.children].forEach((d, k) => d.classList.toggle("on", k === i));
+    fb.classList.add("hidden"); img.classList.remove("hidden");
+    img.style.animation = "none"; void img.offsetWidth; img.style.animation = "";
+    img.onerror = () => fallback(g);
+    if (g.src) img.src = g.src; else fallback(g);
+    tm = setTimeout(() => { i++; show(); }, (CONFIG.gifSeconds || 4) * 1000);
+  };
+  box.onclick = () => { i++; show(); };
+  box.classList.remove("hidden"); show();
+}
+
+/* ---------- cute extras ---------- */
+function floatHeart(x, y, ch) {
+  const e = document.createElement("span"); e.className = "fl"; e.textContent = ch || "❤️";
+  e.style.left = (x - 12 + Math.random() * 40 - 20) + "px"; e.style.top = y + "px";
+  document.body.appendChild(e); setTimeout(() => e.remove(), 1200);
+}
+const mid = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+
+/* hug the teddy */
+let hugs = 0; const HUGS = 5, teddy = $("#teddy");
+teddy.onclick = () => {
+  if (hugs >= HUGS) return; hugs++;
+  teddy.classList.add("sq"); setTimeout(() => teddy.classList.remove("sq"), 160);
+  const [x, y] = mid(teddy); for (let i = 0; i < 3; i++) floatHeart(x, y - 40);
+  if (navigator.vibrate) navigator.vibrate(30);
+  if (hugs < HUGS) $("#hugSub").textContent = "Hugs: " + hugs + " / " + HUGS;
+  else { $("#hugSub").textContent = CONFIG.hugMessage; rain(); $("#hugNext").classList.remove("hidden"); }
+};
+teddy.onkeydown = e => { if (e.key === "Enter" || e.key === " ") teddy.click(); };
+
+/* love meter (hold the heart) */
+let mv = 0, mt = null, mdone = false; const mh = $("#mHeart");
+function mtick() {
+  mv += mv < 100 ? 1.2 : mv < 400 ? 12 : 40;
+  $("#mFill").style.width = Math.min(mv, 100) + "%";
+  mh.style.transform = "scale(" + (1 + Math.min(mv, 1000) / 1000) + ")";
+  if (Math.random() < .3) { const [x, y] = mid(mh); floatHeart(x, y - 30, "💗"); }
+  if (mv >= 1000) {
+    stopM(); mdone = true; mh.style.transform = "scale(1.3)"; mh.style.pointerEvents = "none"; $("#mPct").textContent = "∞"; $("#mSub").textContent = CONFIG.meterText;
+    for (let i = 0; i < 30; i++) setTimeout(() => heart(false), i * 40);
+    start(); rain(); $("#mNext").classList.remove("hidden"); return;
+  }
+  $("#mPct").textContent = Math.floor(mv) + "%";
+}
+function stopM() { clearInterval(mt); mt = null; }
+mh.addEventListener("pointerdown", e => { e.preventDefault(); if (mdone || mt) return; try { mh.setPointerCapture(e.pointerId); } catch (_) {} mt = setInterval(mtick, 40); });
+["pointerup", "pointercancel"].forEach(ev => mh.addEventListener(ev, stopM));
+mh.addEventListener("contextmenu", e => e.preventDefault());
+
+/* catch the hearts */
+let caught = 0, ct = null; const arena = $("#arena"), GOAL = CONFIG.catchGoal || 10;
+function spawn() {
+  const h = document.createElement("span"); h.className = "hf";
+  h.textContent = ["❤️","💖","💗","💕"][(Math.random() * 4) | 0];
+  h.style.left = (4 + Math.random() * 80) + "%"; h.style.animationDuration = (3 + Math.random() * 2) + "s";
+  h.addEventListener("pointerdown", e => {
+    e.preventDefault(); if (h.classList.contains("got")) return;
+    h.classList.add("got"); caught++; if (navigator.vibrate) navigator.vibrate(15);
+    $("#cSub").textContent = caught + " / " + GOAL; setTimeout(() => h.remove(), 300);
+    if (caught === GOAL) { clearInterval(ct); ct = null; $("#cSub").textContent = "You caught all my hearts 💖"; rain(); $("#cNext").classList.remove("hidden"); }
+  });
+  h.addEventListener("animationend", () => h.remove());
+  arena.appendChild(h);
+}
+init["s-catch"] = () => { caught = 0; $("#cSub").textContent = "Tap " + GOAL + " hearts to catch them"; clearInterval(ct); ct = setInterval(spawn, 550); spawn(); };
+
+/* candy crush */
+const CN = 7, CT = ["🍬","🍭","🍩","🍪","🍓","🍇"], TARGET = CONFIG.candyTarget || 1000;
+const cb = $("#cboard"); let G = [], cbusy = false, cscore = 0, cmoves = 0, cwon = false, csel = null, cdown = null;
+const cwait = ms => new Promise(r => setTimeout(r, ms)), crand = () => (Math.random() * CT.length) | 0;
+function cplace(cd, r, c) { cd.r = r; cd.c = c; cd.el.style.transform = "translate(" + c * 100 + "%," + r * 100 + "%)"; }
+function cnew(r, c, t) {
+  const el = document.createElement("div"); el.className = "cd";
+  const sp = document.createElement("span"); sp.textContent = CT[t]; el.appendChild(sp); cb.appendChild(el);
+  const cd = {t, el, sp, r, c}; cplace(cd, r, c); return cd;
+}
+function cmatches() {
+  const m = new Set(), runs = [];
+  for (let a = 0; a < CN; a++) for (const hor of [true, false]) {
+    const at = k => hor ? G[a][k] : G[k][a]; let i = 0;
+    while (i < CN) {
+      let j = i; while (j + 1 < CN && at(j + 1).t === at(i).t) j++;
+      if (j - i >= 2) { runs.push(j - i + 1); for (let k = i; k <= j; k++) m.add(at(k)); }
+      i = j + 1;
+    }
+  }
+  return {m, runs};
+}
+function chasMove() {
+  for (let r = 0; r < CN; r++) for (let c = 0; c < CN; c++) for (const [dr, dc] of [[0, 1], [1, 0]]) {
+    const r2 = r + dr, c2 = c + dc; if (r2 >= CN || c2 >= CN) continue;
+    [G[r][c], G[r2][c2]] = [G[r2][c2], G[r][c]];
+    const ok = cmatches().m.size > 0;
+    [G[r][c], G[r2][c2]] = [G[r2][c2], G[r][c]];
+    if (ok) return true;
+  }
+  return false;
+}
+function cfill() {
+  cb.innerHTML = ""; G = [];
+  for (let r = 0; r < CN; r++) {
+    G[r] = [];
+    for (let c = 0; c < CN; c++) {
+      let t;
+      do { t = crand(); } while ((c > 1 && G[r][c - 1].t === t && G[r][c - 2].t === t) || (r > 1 && G[r - 1][c].t === t && G[r - 2][c].t === t));
+      G[r][c] = cnew(r, c, t);
+    }
+  }
+  if (!chasMove()) cfill();
+}
+function creshuffle() {
+  do { G.forEach(row => row.forEach(cd => { cd.t = crand(); cd.sp.textContent = CT[cd.t]; })); } while (cmatches().m.size || !chasMove());
+}
+function cswap(r1, c1, r2, c2) { const a = G[r1][c1], b = G[r2][c2]; G[r1][c1] = b; G[r2][c2] = a; cplace(a, r2, c2); cplace(b, r1, c1); }
+function cui() {
+  $("#cscore").textContent = "Score " + cscore + " / " + TARGET;
+  const p = Math.min(1, cscore / TARGET); $("#cfill").style.width = (p * 100) + "%";
+  const im = $("#cprize img"); if (im) im.style.filter = "blur(" + ((1 - p) * 14) + "px)";
+}
+function cwin() {
+  cwon = true; $("#cwMsg").textContent = CONFIG.candyMessage; $("#cwin").classList.remove("hidden"); rain();
+  $("#cHint").textContent = "You won! 🎉";
+}
+function cclr() { if (csel) { const cd = G[csel.r][csel.c]; if (cd) cd.el.classList.remove("sel"); csel = null; } }
+function csetsel(r, c) { cclr(); csel = {r, c}; G[r][c].el.classList.add("sel"); }
+async function ctry(r1, c1, r2, c2) {
+  if (cbusy) return; cbusy = true; cclr();
+  cswap(r1, c1, r2, c2); await cwait(240);
+  let res = cmatches();
+  if (!res.m.size) { cswap(r1, c1, r2, c2); await cwait(240); cbusy = false; return; }
+  if (++cmoves >= 25) $("#cSkip").classList.remove("hidden");
+  let combo = 1;
+  while (res.m.size) {
+    let pts = 0; res.runs.forEach(l => pts += l === 3 ? 60 : l === 4 ? 120 : 200); pts *= combo; cscore += pts; cui();
+    let sx = 0, sy = 0; res.m.forEach(cd => { sx += cd.c; sy += cd.r; });
+    const b = cb.getBoundingClientRect(), n = res.m.size;
+    floatHeart(b.left + (sx / n + .5) / CN * b.width, b.top + (sy / n + .5) / CN * b.height, "+" + pts + (combo > 1 ? " x" + combo : ""));
+    res.m.forEach(cd => cd.el.classList.add("pop")); if (navigator.vibrate) navigator.vibrate(15);
+    await cwait(230);
+    res.m.forEach(cd => { cd.el.remove(); G[cd.r][cd.c] = null; });
+    for (let c = 0; c < CN; c++) {
+      let e = 0;
+      for (let r = CN - 1; r >= 0; r--) {
+        if (!G[r][c]) e++;
+        else if (e) { const cd = G[r][c]; G[r + e][c] = cd; G[r][c] = null; cplace(cd, r + e, c); }
+      }
+      for (let r = e - 1; r >= 0; r--) { const cd = cnew(r - e, c, crand()); G[r][c] = cd; void cd.el.offsetWidth; cplace(cd, r, c); }
+    }
+    await cwait(320); combo++; res = cmatches();
+  }
+  if (!cwon && cscore >= TARGET) cwin();
+  if (!chasMove()) creshuffle();
+  cbusy = false;
+}
+const ccell = e => {
+  const b = cb.getBoundingClientRect(), f = (v, o, sz) => Math.max(0, Math.min(CN - 1, Math.floor((v - o) / sz * CN)));
+  return [f(e.clientY, b.top, b.height), f(e.clientX, b.left, b.width)];
+};
+cb.addEventListener("pointerdown", e => { e.preventDefault(); if (cbusy) return; const [r, c] = ccell(e); cdown = {r, c, x: e.clientX, y: e.clientY}; });
+cb.addEventListener("pointermove", e => {
+  if (!cdown || cbusy) return;
+  const dx = e.clientX - cdown.x, dy = e.clientY - cdown.y, th = cb.getBoundingClientRect().width / CN * .4;
+  if (Math.max(Math.abs(dx), Math.abs(dy)) < th) return;
+  const d = cdown, horiz = Math.abs(dx) > Math.abs(dy); cdown = null;
+  const r2 = horiz ? d.r : d.r + Math.sign(dy), c2 = horiz ? d.c + Math.sign(dx) : d.c;
+  if (r2 >= 0 && r2 < CN && c2 >= 0 && c2 < CN) ctry(d.r, d.c, r2, c2);
+});
+cb.addEventListener("pointerup", () => {
+  if (!cdown) return; const d = cdown; cdown = null; if (cbusy) return;
+  if (csel && Math.abs(csel.r - d.r) + Math.abs(csel.c - d.c) === 1) ctry(csel.r, csel.c, d.r, d.c);
+  else if (csel && csel.r === d.r && csel.c === d.c) cclr(); else csetsel(d.r, d.c);
+});
+cb.addEventListener("pointercancel", () => { cdown = null; });
+if (CONFIG.candyPhoto) {
+  const im = new Image(); im.src = CONFIG.candyPhoto; im.alt = ""; $("#cprize").textContent = ""; $("#cprize").appendChild(im);
+  const big = new Image(); big.src = CONFIG.candyPhoto; big.alt = ""; $("#cwPic").appendChild(big);
+} else { const e = document.createElement("div"); e.className = "em"; e.textContent = "💖"; $("#cwPic").appendChild(e); }
+init["s-candy"] = () => { cscore = 0; cmoves = 0; cwon = false; cbusy = false; cclr(); cfill(); cui(); };
+
+/* scratch cards */
+const cards = []; let scratched = 0;
+CONFIG.scratchCards.forEach(msg => {
+  const box = document.createElement("div"); box.className = "scratch";
+  const m = document.createElement("div"); m.textContent = msg;
+  const cvs = document.createElement("canvas"); cvs.className = "sCv";
+  box.append(m, cvs); $("#scs").appendChild(box);
+  const ctx = cvs.getContext("2d"), c = {cvs, ctx, done: false}; cards.push(c);
+  let scr = false, lx = 0, ly = 0;
+  const pt = e => { const r = cvs.getBoundingClientRect(); return [(e.clientX - r.left) * D, (e.clientY - r.top) * D]; };
+  cvs.addEventListener("pointerdown", e => { e.preventDefault(); scr = true; [lx, ly] = pt(e); try { cvs.setPointerCapture(e.pointerId); } catch (_) {} ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + .1, ly); ctx.stroke(); });
+  cvs.addEventListener("pointermove", e => { if (!scr) return; const [x, y] = pt(e); ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(x, y); ctx.stroke(); lx = x; ly = y; });
+  const end = () => {
+    if (!scr) return; scr = false; if (c.done) return;
+    const d = ctx.getImageData(0, 0, cvs.width, cvs.height).data; let n = 0, t = 0;
+    for (let i = 3; i < d.length; i += 160) { t++; if (d[i] < 128) n++; }
+    if (n / t > .5) {
+      c.done = true; cvs.style.opacity = 0; cvs.style.pointerEvents = "none";
+      const [x, y] = mid(box); burst(x, y, 30);
+      if (++scratched === cards.length) { rain(); $("#sNext").classList.remove("hidden"); }
+    }
+  };
+  ["pointerup", "pointercancel"].forEach(ev => cvs.addEventListener(ev, end));
+});
+init["s-scratch"] = () => cards.forEach(c => {
+  const {cvs, ctx} = c, r = cvs.getBoundingClientRect(); cvs.width = r.width * D; cvs.height = r.height * D;
+  const g = ctx.createLinearGradient(0, 0, cvs.width, cvs.height);
+  g.addColorStop(0, "#d9d9e3"); g.addColorStop(.5, "#f6f6fb"); g.addColorStop(1, "#b9b9c9");
+  ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = g; ctx.fillRect(0, 0, cvs.width, cvs.height);
+  ctx.fillStyle = "#8a8aa0"; ctx.font = (20 * D) + "px Fredoka, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("✨ Scratch here ✨", cvs.width / 2, cvs.height / 2);
+  ctx.globalCompositeOperation = "destination-out"; ctx.lineWidth = 40 * D; ctx.lineCap = "round";
+});
+
+/* fortune cookie */
+let fi = 0, busy = false; const ck = $("#cookie"), F = CONFIG.fortunes;
+ck.onclick = () => {
+  if (busy || fi >= F.length) return; busy = true;
+  ck.classList.remove("shake"); void ck.offsetWidth; ck.classList.add("shake");
+  if (navigator.vibrate) navigator.vibrate(30);
+  setTimeout(() => {
+    const sl = $("#slip"); sl.classList.remove("hidden"); sl.style.animation = "none"; void sl.offsetWidth; sl.style.animation = "";
+    sl.textContent = "✨ " + F[fi];
+    const [x, y] = mid(ck); floatHeart(x, y, "✨"); fi++; busy = false;
+    if (fi < F.length) $("#fcSub").textContent = "Tap again for another one (" + fi + " / " + F.length + ")";
+    else { $("#fcSub").textContent = "That's all of them 🥠"; rain(); $("#fcNext").classList.remove("hidden"); }
+  }, 450);
+};
+ck.onkeydown = e => { if (e.key === "Enter" || e.key === " ") ck.click(); };
+
+/* ---------- 9 video ---------- */
+$("#vTitle").textContent = CONFIG.videoTitle;
+if (CONFIG.video) { vid.src = CONFIG.video; if (CONFIG.videoPoster) vid.poster = CONFIG.videoPoster; }
+else { $("#vbox").textContent = "Add your video in CONFIG.video"; }
+vid.onplay = () => mus.pause();
+vid.onended = () => { if (CONFIG.music) mus.play().catch(() => {}); burst(innerWidth / 2, innerHeight / 2, 50); };
+
+/* ---------- 10 gift ---------- */
+let taps = 0; const gift = $("#gift");
+gift.onclick = () => {
+  if (taps >= 3) return; taps++;
+  gift.classList.remove("shake"); void gift.offsetWidth; gift.classList.add("shake");
+  if (navigator.vibrate) navigator.vibrate(30);
+  $("#gSub").textContent = taps < 3 ? (3 - taps) + " more" : "";
+  if (taps === 3) {
+    gift.textContent = "🎉"; $("#giftMsg").textContent = CONFIG.gift;
+    $("#giftMsg").classList.remove("hidden"); $("#gNext").classList.remove("hidden"); rain();
+  }
+};
+gift.onkeydown = e => { if (e.key === "Enter" || e.key === " ") gift.click(); };
+
+/* ---------- 12 final letter ---------- */
+$("#lTitle").textContent = CONFIG.letterTitle;
+CONFIG.letter.forEach((t, i) => {
+  const p = document.createElement("p"); p.textContent = t; p.style.animationDelay = (1 + i * .9) + "s";
+  $("#lBody").appendChild(p);
+});
+$("#lSign").textContent = CONFIG.signature;
+$("#env").onclick = () => {
+  const env = $("#env"); if (env.classList.contains("open")) return;
+  env.classList.add("open");
+  setTimeout(flood, 500);
+  setTimeout(() => {
+    $("#envWrap").classList.add("hidden");
+    $("#paper").classList.remove("hidden");
+    $("#fin").style.justifyContent = "flex-start";
+  }, 2200);
+  setTimeout(() => $("#again").classList.remove("hidden"), 1000 + CONFIG.letter.length * 900 + 2200);
+};
+$("#again").onclick = () => location.reload();
+</script>
+</body>
+</html>
