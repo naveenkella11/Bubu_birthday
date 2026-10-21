@@ -36,10 +36,15 @@ button.alt{background:var(--teal);box-shadow:0 6px 0 #1a9a8a;color:#05302b}
 .balloon.pop{transform:scale(1.8);opacity:0;pointer-events:none}
 @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-10px) rotate(3deg)}}
 
-/* wish star */
-#star{font-size:6rem;cursor:pointer;animation:glow 1.6s ease-in-out infinite;transition:transform 1.4s ease-in,opacity 1.4s;user-select:none}
-#star.fly{transform:translateY(-70vh) scale(.3);opacity:0;animation:none}
-@keyframes glow{50%{transform:scale(1.15);filter:drop-shadow(0 0 22px #ffd54a)}}
+/* photo puzzle */
+#pzThumb{width:64px;height:64px;flex:none;border-radius:12px;overflow:hidden;border:3px solid #fff;background:rgba(255,255,255,.2)}
+#pzThumb img{width:100%;height:100%;object-fit:cover;display:block}
+#pzBoard{position:relative;width:min(92vw,340px);aspect-ratio:1;border-radius:14px;overflow:hidden;background:rgba(0,0,0,.3);box-shadow:0 10px 30px rgba(0,0,0,.4);touch-action:manipulation;margin-bottom:12px}
+.pc{position:absolute;left:0;top:0;width:calc(100% / 3);height:calc(100% / 3);overflow:hidden;cursor:pointer;transition:transform .3s ease;-webkit-user-select:none;user-select:none}
+.pc img{position:absolute;width:300%;height:300%;max-width:none;object-fit:cover;pointer-events:none}
+.pc::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 2px rgba(255,255,255,.8);pointer-events:none;transition:box-shadow .3s}
+.pc.sel{z-index:2}.pc.sel::after{box-shadow:inset 0 0 0 5px var(--gold)}.pc.sel img{filter:brightness(1.18)}
+#pzBoard.done .pc::after{box-shadow:none}
 
 /* cake */
 .cakeSvg{width:min(88vw,360px);height:auto;overflow:visible}
@@ -172,12 +177,14 @@ button.alt{background:var(--teal);box-shadow:0 6px 0 #1a9a8a;color:#05302b}
   <div id="balloons"></div>
 </section>
 
-<!-- 4 WISH -->
-<section class="screen">
-  <h1>Make a wish</h1>
-  <p class="sub" id="wishSub">Close your eyes, think of one wish, then tap the star.</p>
-  <div id="star">⭐</div>
-  <button data-next class="hidden" id="wishNext">Next</button>
+<!-- PHOTO PUZZLE -->
+<section class="screen" id="s-puzzle">
+  <h1 id="pzTitle"></h1>
+  <div class="crow"><div id="pzThumb"></div>
+    <div class="cinfo"><div id="pzInfo" style="font-size:1.1rem;font-weight:600"></div>
+    <p class="sub" id="pzHint" style="margin:4px 0 0;font-size:.9rem">Tap two pieces to swap them</p></div></div>
+  <div id="pzBoard"></div>
+  <button data-next class="hidden" id="pzNext">Next</button>
 </section>
 
 <!-- 5 CAKE -->
@@ -327,6 +334,9 @@ const CONFIG = {
   startButton: "Open your surprise",
   loveQuestion: "Do you love me? 🥺",
   loveYesReply: "I knew it! I love you too ❤️",
+  puzzlePhoto: "puzzle.jpg",               // your photo for the 9-piece puzzle (same folder)
+  puzzleTitle: "Put our memory together 🧩",
+  puzzleDone: "Perfect! That's us 💕",
   gifSeconds: 3,                           // seconds each GIF stays on screen (tap to skip)
   loveGifs: [                              // GIFs shown one by one after she taps Yes
     { src: "gif1.gif", caption: "Dudu is so happy! 🐻" },
@@ -357,7 +367,7 @@ const CONFIG = {
     "You make ordinary days feel special."
   ],
   photos: [                                // put images next to index.html
-    { src: "cfc271ca-e31d-4dd5-8d57-57c867cdda67.jpeg", caption: "Our first trip" },   // e.g. src: "photo1.jpg"
+    { src: "cfc271ca-e31d-4dd5-8d57-57c867cdda67.jpeg", caption: "Our first photo" },   // e.g. src: "photo1.jpg"
     { src: "5a967918-a57c-4d9b-a1d3-e93adc06ef01.jpeg", caption: "That silly day" },
     { src: "2022.png", caption: "2022" },
     { src: "2023.png", caption: "2023" },
@@ -472,12 +482,48 @@ letters.forEach((ch, i) => {
   $("#balloons").appendChild(b);
 });
 
-/* ---------- 4 wish ---------- */
-$("#star").onclick = () => {
-  const s = $("#star"); if (s.classList.contains("fly")) return;
-  s.classList.add("fly"); burst(innerWidth / 2, innerHeight / 2, 40);
-  $("#wishSub").textContent = "Your wish is on its way ✨";
-  setTimeout(() => $("#wishNext").classList.remove("hidden"), 1300);
+/* ---------- photo puzzle (3 x 3 = 9 pieces) ---------- */
+const PZ = 3, pzb = $("#pzBoard"), pzImgs = [], pzEls = [], pos = [];
+let pzSel = -1, pzMoves = 0, pzDone = false;
+$("#pzTitle").textContent = CONFIG.puzzleTitle;
+function pzSample() {
+  const c = document.createElement("canvas"); c.width = c.height = 900; const x = c.getContext("2d");
+  const g = x.createLinearGradient(0, 0, 900, 900); g.addColorStop(0, "#ff9ec7"); g.addColorStop(1, "#8b5cf6");
+  x.fillStyle = g; x.fillRect(0, 0, 900, 900); x.font = "120px serif"; x.textAlign = "center";
+  [["💕",150,200],["🎂",450,300],["🎈",760,170],["🧸",200,560],["💖",470,620],["🎁",740,520],["⭐",160,810],["🍰",470,850],["🥳",760,820]].forEach(e => x.fillText(e[0], e[1], e[2]));
+  return c.toDataURL("image/png");
+}
+let pzFell = false;
+function pzFallback() { if (pzFell) return; pzFell = true; const u = pzSample(); pzImgs.forEach(i => i.src = u); }
+const thumb = new Image(); thumb.alt = ""; thumb.onerror = pzFallback; thumb.src = CONFIG.puzzlePhoto; pzImgs.push(thumb); $("#pzThumb").appendChild(thumb);
+for (let k = 0; k < PZ * PZ; k++) {
+  const el = document.createElement("div"); el.className = "pc";
+  const im = new Image(); im.alt = ""; im.onerror = pzFallback; im.src = CONFIG.puzzlePhoto;
+  im.style.left = -(k % PZ) * 100 + "%"; im.style.top = -Math.floor(k / PZ) * 100 + "%";
+  el.appendChild(im); pzImgs.push(im); pzb.appendChild(el); pzEls.push(el); pos.push(k);
+  el.onclick = () => pzTap(k);
+}
+const pzPlace = k => { const p = pos[k]; pzEls[k].style.transform = "translate(" + (p % PZ) * 100 + "%," + Math.floor(p / PZ) * 100 + "%)"; };
+const pzCorrect = () => pos.filter((p, k) => p === k).length;
+function pzUI() { $("#pzInfo").textContent = "Moves " + pzMoves + "  ·  Correct " + pzCorrect() + " / " + PZ * PZ; }
+function pzTap(k) {
+  if (pzDone) return;
+  if (pzSel < 0) { pzSel = k; pzEls[k].classList.add("sel"); return; }
+  if (pzSel === k) { pzEls[k].classList.remove("sel"); pzSel = -1; return; }
+  const a = pzSel; pzEls[a].classList.remove("sel"); pzSel = -1;
+  [pos[a], pos[k]] = [pos[k], pos[a]]; pzPlace(a); pzPlace(k); pzMoves++; pzUI();
+  if (navigator.vibrate) navigator.vibrate(20);
+  if (pzCorrect() === PZ * PZ) {
+    pzDone = true; pzb.classList.add("done"); $("#pzHint").textContent = CONFIG.puzzleDone;
+    rain(); for (let i = 0; i < 30; i++) setTimeout(() => heart(false), i * 40); start();
+    setTimeout(() => $("#pzNext").classList.remove("hidden"), 900);
+  }
+}
+init["s-puzzle"] = () => {
+  pzDone = false; pzMoves = 0; pzSel = -1; pzb.classList.remove("done"); $("#pzNext").classList.add("hidden");
+  pzEls.forEach(e => e.classList.remove("sel"));
+  do { for (let i = PZ * PZ - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [pos[i], pos[j]] = [pos[j], pos[i]]; } } while (pzCorrect() > 1);
+  pzEls.forEach((_, k) => pzPlace(k)); pzUI();
 };
 
 /* ---------- 5 candles ---------- */
